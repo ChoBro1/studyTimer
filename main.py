@@ -67,7 +67,49 @@ class StudyTimer:
             t.start()
             self.running = True
 
+    def _run_through_timer(self, seconds):
+        while seconds > 0 and not self.stopped:
+            minutes = seconds / 60
+            seconds = seconds % 60
+            # Update Time Display
+            # Padding: "{minutes:02d}:{seconds:02d}"
+            time.sleep(1)
+            seconds -= 1
+
+    # Have three different timers for each "session"
     def start_timer(self):
+        self.stopped = False
+        self.skipped = False
+        timer_id = self.tabs.index(self.tabs.select()) + 1
+
+        # Start timer for pomodoro
+        if timer_id == 1:
+            # Time operates by seconds
+            seconds = 60 * 25 #25 minutes
+            self._run_through_timer(seconds)
+            # Go to next timer based off of self.count
+            if not self.stopped or self.skipped:
+                # Update Count Display
+                self.count += 1
+                if self.count % 4 == 0:
+                    # Move to Long Break Timer
+                    pass
+                else:
+                    # Move to Short Break Timer ( timer_id = 2 )
+                    pass
+                self.start_timer()
+        elif timer_id == 2:
+            seconds = 60 * 5  # 5 minutes
+            self._run_through_timer(seconds)
+            if not self.stopped or self.skipped:
+                # Return to Pomodoro Timer
+                pass
+        else: # Long Break Timer
+            seconds = 60 * 10  # 10 minutes
+            self._run_through_timer(seconds)
+            if not self.stopped or self.skipped:
+                # Return to Pomodoro Timer
+                pass
         pass
 
     def reset_clock(self):
