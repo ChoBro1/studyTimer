@@ -67,14 +67,20 @@ class StudyTimer:
             t.start()
             self.running = True
 
-    def _run_through_timer(self, seconds):
-        while seconds > 0 and not self.stopped:
-            minutes = seconds / 60
-            seconds = seconds % 60
+    def _run_through_timer(self, fseconds, timer_id):
+        while fseconds > 0 and not self.stopped:
+            minutes = fseconds // 60
+            seconds = fseconds % 60
             # Update Time Display
-            # Padding: "{minutes:02d}:{seconds:02d}"
+            if timer_id == 1:
+                self.pomodoro_timer_label.config(text=f"{minutes:02d}:{seconds:02d}")
+            elif timer_id == 2:
+                self.short_break_timer_label.config(text=f"{minutes:02d}:{seconds:02d}")
+            else:
+                self.long_break_timer_label.config(text=f"{minutes:02d}:{seconds:02d}")
+            self.root.update()
             time.sleep(1)
-            seconds -= 1
+            fseconds -= 1
 
     # Have three different timers for each "session"
     def start_timer(self):
@@ -86,37 +92,56 @@ class StudyTimer:
         if timer_id == 1:
             # Time operates by seconds
             seconds = 60 * 25 #25 minutes
-            self._run_through_timer(seconds)
+            self._run_through_timer(seconds, 1)
             # Go to next timer based off of self.count
             if not self.stopped or self.skipped:
                 # Update Count Display
                 self.count += 1
+                self.pomodoro_counter_label.config(text=f"Count: {self.count}")
                 if self.count % 4 == 0:
                     # Move to Long Break Timer
-                    pass
+                    self.tabs.select(2)
                 else:
-                    # Move to Short Break Timer ( timer_id = 2 )
-                    pass
+                    # Move to Short Break Timer ( timer_id = 1 )
+                    self.tabs.select(1)
                 self.start_timer()
         elif timer_id == 2:
             seconds = 60 * 5  # 5 minutes
-            self._run_through_timer(seconds)
+            self._run_through_timer(seconds, 2)
             if not self.stopped or self.skipped:
                 # Return to Pomodoro Timer
-                pass
+                self.tabs.select(0)
+                self.start_timer()
         else: # Long Break Timer
             seconds = 60 * 10  # 10 minutes
-            self._run_through_timer(seconds)
+            self._run_through_timer(seconds, 3)
             if not self.stopped or self.skipped:
                 # Return to Pomodoro Timer
-                pass
-        pass
+                self.tabs.select(0)
+                self.start_timer()
 
     def reset_clock(self):
-        pass
+        self.stopped = True
+        self.skipped = False
+        self.count = 0
+        self.pomodoro_timer_label.config(text="25:00")
+        self.short_break_timer_label.config(text="05:00")
+        self.long_break_timer_label.config(text="10:00")
+        self.pomodoro_counter_label.config(text="Count: 0")
+        self.running = False
 
     def skip_clock(self):
-        pass
+        # Reset the timers for each tab
+        current_tab = self.tabs.index(self.tabs.select())
+        if current_tab == 0:
+            self.pomodoro_timer_label.config(text="25:00")
+        elif current_tab == 1:
+            self.short_break_timer_label.config(text="05:00")
+        elif current_tab == 2:
+            self.long_break_timer_label.config(text="10:00")
+
+        self.stopped = True
+        self.skipped = True
 
 StudyTimer()
 
